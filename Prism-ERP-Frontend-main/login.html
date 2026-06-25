@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Prism-ERP</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        body.login-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        .login-card {
+            background: #fff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 14px;
+            padding: 36px 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .login-logo .logo-box {
+            width: 42px;
+            height: 42px;
+            background: #4f46e5;
+            color: #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .login-logo h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #1f2230;
+        }
+
+        .login-logo p {
+            margin: 0;
+            font-size: 12px;
+            color: #8a8fa3;
+        }
+
+        .login-card h3 {
+            margin: 0 0 6px;
+            color: #1f2230;
+        }
+
+        .login-card .subtitle {
+            margin: 0 0 24px;
+            color: #8a8fa3;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #424867;
+            margin-bottom: 6px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a1a6bb;
+            font-size: 14px;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            border: 1px solid #e2e4ec;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .input-wrap input:focus {
+            border-color: #4f46e5;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .login-btn:hover {
+            background: #3f3acb;
+        }
+
+        .error-msg {
+            background: #fdecec;
+            color: #c0392b;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .demo-hint {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1px dashed #e2e4ec;
+            font-size: 12px;
+            color: #8a8fa3;
+            line-height: 1.6;
+        }
+
+        .demo-hint strong {
+            color: #424867;
+        }
+    </style>
+</head>
+<body class="login-body">
+
+    <div class="login-card">
+
+        <div class="login-logo">
+            <div class="logo-box">S1</div>
+            <div>
+                <h2>Prism-ERP</h2>
+                <p>Enterprise Suite</p>
+            </div>
+        </div>
+
+        <h3>Welcome back</h3>
+        <p class="subtitle">Sign in to access your dashboard</p>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">Sign In</button>
+
+        </form>
+
+    </div>
+
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // If already logged in, skip straight to the dashboard
+        if (getSession()) {
+            window.location.href = "index.html";
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const errorEl = document.getElementById("errorMsg");
+
+            const result = login(username, password);
+
+            if (result.ok) {
+                window.location.href = "index.html";
+            } else {
+                errorEl.textContent = result.message;
+                errorEl.style.display = "block";
+            }
+        });
+    </script>
+
+</body>
+</html>

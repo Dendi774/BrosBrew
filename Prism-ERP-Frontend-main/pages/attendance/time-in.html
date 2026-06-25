@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Orders | Prism-ERP</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="../../assets/css/style.css">
+
+    <!-- Auth (must run before page paints) -->
+    <script src="../../assets/js/auth.js"></script>
+    <script>
+        var currentSession = requireAuth("attendance");
+    </script>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-box">S1</div>
+
+            <div class="logo-text">
+                <h2>Prism-ERP</h2>
+                <p>Enterprise Suite</p>
+            </div>
+        </div>
+
+        <nav>
+
+            <ul>
+
+                <li data-module="dashboard">
+                    <a href="../../index.html">
+                        <i class="fas fa-chart-pie"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="sales">
+                    Sales
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/sales-orders.html">
+                        <i class="fas fa-cart-shopping"></i>
+                        Sales Orders
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/invoices.html">
+                        <i class="fas fa-file-invoice"></i>
+                        Invoices
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/receipts.html">
+                        <i class="fas fa-receipt"></i>
+                        Receipts
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/sales-returns.html">
+                        <i class="fas fa-rotate-left"></i>
+                        Sales Returns
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="inventory">
+                    Inventory
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/products.html">
+                        <i class="fas fa-box"></i>
+                        Product Catalog
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-levels.html">
+                        <i class="fas fa-warehouse"></i>
+                        Stock Levels
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-in.html">
+                        <i class="fas fa-arrow-down"></i>
+                        Stock In
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-out.html">
+                        <i class="fas fa-arrow-up"></i>
+                        Stock Out
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/adjustments.html">
+                        <i class="fas fa-sliders"></i>
+                        Inventory Adjustments
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/low-stock.html">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        Low Stock Alerts
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="employees">
+                    Employees
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/profiles.html">
+                        <i class="fas fa-users"></i>
+                        Employee Profiles
+                    </a>
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/positions.html">
+                        <i class="fas fa-briefcase"></i>
+                        Positions
+                    </a>
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/status.html">
+                        <i class="fas fa-user-check"></i>
+                        Employment Status
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="attendance">
+                    Attendance
+                </li>
+
+                <li class="active" data-module="attendance">
+                    <a href="../../pages/attendance/time-in.html">
+                        <i class="fas fa-clock"></i>
+                        Time In
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/time-out.html">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        Time Out
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/records.html">
+                        <i class="fas fa-calendar-days"></i>
+                        Attendance Records
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/leave-request.html">
+                        <i class="fas fa-file-circle-check"></i>
+                        Leave Request
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="payroll">
+                    Payroll
+                </li>
+
+                <li data-module="payroll">
+                    <a href="../../pages/payroll/payslips.html">
+                        <i class="fas fa-file-pdf"></i>
+                        Payslip Generation
+                    </a>
+                </li>
+
+            </ul>
+            <div class="sidebar-footer">
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        JD
+                    </div>
+
+                    <div class="user-info">
+                        <h4>Juan Dela Cruz</h4>
+                        <p>System Administrator</p>
+                    </div>
+
+                <button class="icon-btn" data-action="logout" title="Logout" style="margin-left:auto;">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                </button>
+
+                </div>
+
+            </div>
+
+        </nav>     
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+<main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+        <div class="breadcrumb">
+            Attendance > Time In
+        </div>
+
+        <div class="topbar-right">
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search Records...">
+            </div>
+
+            <button class="icon-btn">
+                <i class="fas fa-bell"></i>
+            </button>
+
+            <button class="icon-btn">
+                <i class="fas fa-circle-question"></i>
+            </button>
+
+            <button class="icon-btn">
+                <i class="fas fa-gear"></i>
+            </button>
+
+            <div class="date" id="currentDate"></div>
+
+        </div>
+
+    </header>
+
+    <!-- CONTENT -->
+    <section class="content">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+
+            <div>
+                <h1>Time In</h1>
+                <p>Today — June 22, 2026</p>
+            </div>
+
+        </div>
+
+        <!-- ACTION BAR -->
+        <div class="action-bar">
+
+            <div class="filter-group">
+
+                <div class="stat-badge">
+                    On Time: <strong>5</strong>
+                </div>
+
+                <div class="stat-badge">
+                    Late: <strong>2</strong>
+                </div>
+
+                <div class="stat-badge">
+                    Absent: <strong>2</strong>
+                </div>
+
+                <div class="stat-badge">
+                    Not Yet In: <strong>3</strong>
+                </div>
+
+            </div>
+
+            <div class="action-buttons">
+
+                <button class="secondary-btn">
+                    <i class="fas fa-download"></i>
+                    Export
+                </button>
+
+                <button class="add-btn">
+                    <i class="fas fa-right-to-bracket"></i>
+                    Record Time In
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-card">
+
+            <h3>Today's Time-In Log</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Log #</th>
+                        <th>Emp ID</th>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Time In</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>ATT-20260613-001</td>
+                        <td>EMP-001</td>
+                        <td>Maria C. Santos</td>
+                        <td>Sales</td>
+                        <td>07:58 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status success">ON TIME</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-002</td>
+                        <td>EMP-002</td>
+                        <td>Roberto P. Cruz</td>
+                        <td>IT</td>
+                        <td>08:15 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status success">ON TIME</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-003</td>
+                        <td>EMP-003</td>
+                        <td>Ana B. Reyes</td>
+                        <td>Finance</td>
+                        <td>09:34 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status warning">LATE</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-004</td>
+                        <td>EMP-005</td>
+                        <td>Carmen R. Flores</td>
+                        <td>HR</td>
+                        <td>07:58 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status success">ON TIME</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-005</td>
+                        <td>EMP-006</td>
+                        <td>Miguel T. Torres</td>
+                        <td>Sales</td>
+                        <td>08:02 AM</td>
+                        <td>Manual</td>
+                        <td>
+                            <span class="status success">ON TIME</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-006</td>
+                        <td>EMP-007</td>
+                        <td>Liza P. Gomez</td>
+                        <td>Finance</td>
+                        <td>08:00 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status success">ON TIME</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>ATT-20260613-007</td>
+                        <td>EMP-010</td>
+                        <td>Ricardo L. Mendez</td>
+                        <td>Procurement</td>
+                        <td>08:45 AM</td>
+                        <td>Biometric</td>
+                        <td>
+                            <span class="status warning">LATE</span>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+<script src="../../assets/js/dashboard.js"></script>
+
+    <!-- Apply role-based sidebar restrictions now that the DOM exists -->
+    <script>
+        applySidebarAccess(currentSession);
+    </script>
+</body>
+</html>

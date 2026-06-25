@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Out | Business ERP</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="../../assets/css/style.css">
+
+    <!-- Auth (must run before page paints) -->
+    <script src="../../assets/js/auth.js"></script>
+    <script>
+        var currentSession = requireAuth("payroll");
+    </script>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-box">S1</div>
+
+            <div class="logo-text">
+                <h2>Prism-ERP</h2>
+                <p>Enterprise Suite</p>
+            </div>
+        </div>
+
+        <nav>
+
+            <ul>
+
+                <li data-module="dashboard">
+                    <a href="../../index.html">
+                        <i class="fas fa-chart-pie"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="sales">
+                    Sales
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/sales-orders.html">
+                        <i class="fas fa-cart-shopping"></i>
+                        Sales Orders
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/invoices.html">
+                        <i class="fas fa-file-invoice"></i>
+                        Invoices
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/receipts.html">
+                        <i class="fas fa-receipt"></i>
+                        Receipts
+                    </a>
+                </li>
+
+                <li data-module="sales">
+                    <a href="../../pages/sales/sales-returns.html">
+                        <i class="fas fa-rotate-left"></i>
+                        Sales Returns
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="inventory">
+                    Inventory
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/products.html">
+                        <i class="fas fa-box"></i>
+                        Product Catalog
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-levels.html">
+                        <i class="fas fa-warehouse"></i>
+                        Stock Levels
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-in.html">
+                        <i class="fas fa-arrow-down"></i>
+                        Stock In
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-out.html">
+                        <i class="fas fa-arrow-up"></i>
+                        Stock Out
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/adjustments.html">
+                        <i class="fas fa-sliders"></i>
+                        Inventory Adjustments
+                    </a>
+                </li>
+
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/low-stock.html">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        Low Stock Alerts
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="employees">
+                    Employees
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/profiles.html">
+                        <i class="fas fa-users"></i>
+                        Employee Profiles
+                    </a>
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/positions.html">
+                        <i class="fas fa-briefcase"></i>
+                        Positions
+                    </a>
+                </li>
+
+                <li data-module="employees">
+                    <a href="../../pages/employees/status.html">
+                        <i class="fas fa-user-check"></i>
+                        Employment Status
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="attendance">
+                    Attendance
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/time-in.html">
+                        <i class="fas fa-clock"></i>
+                        Time In
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/time-out.html">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        Time Out
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/records.html">
+                        <i class="fas fa-calendar-days"></i>
+                        Attendance Records
+                    </a>
+                </li>
+
+                <li data-module="attendance">
+                    <a href="../../pages/attendance/leave-request.html">
+                        <i class="fas fa-file-circle-check"></i>
+                        Leave Request
+                    </a>
+                </li>
+
+                <li class="menu-title" data-module="payroll">
+                    Payroll
+                </li>
+
+                <li class="active" data-module="payroll">
+                    <a href="#">
+                        <i class="fas fa-file-pdf"></i>
+                        Payslip Generation
+                    </a>
+                </li>
+
+            </ul>
+            <div class="sidebar-footer">
+
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        JD
+                    </div>
+
+                    <div class="user-info">
+                        <h4>Juan Dela Cruz</h4>
+                        <p>System Administrator</p>
+                    </div>
+
+                <button class="icon-btn" data-action="logout" title="Logout" style="margin-left:auto;">
+                    <i class="fas fa-arrow-right-from-bracket"></i>
+                </button>
+
+                </div>
+
+            </div>
+
+        </nav>     
+
+    </aside>
+
+<!-- CONTENT -->
+<section class="content">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Payslip Generation</h1>
+            <p>Period: June 1–15, 2026</p>
+        </div>
+
+    </div>
+
+    <!-- ACTION BAR -->
+
+    <div class="action-bar">
+
+        <div class="filter-group">
+
+            <select>
+                <option>June 1–15, 2026</option>
+                <option>June 16–30, 2026</option>
+                <option>July 1–15, 2026</option>
+            </select>
+
+            <select>
+                <option>All Departments</option>
+                <option>Sales</option>
+                <option>IT</option>
+                <option>Finance</option>
+                <option>HR</option>
+                <option>Warehouse</option>
+                <option>Procurement</option>
+            </select>
+
+        </div>
+
+        <div class="action-buttons">
+
+            <button class="secondary-btn">
+                <i class="fas fa-download"></i>
+                Export
+            </button>
+
+            <button class="add-btn">
+                <i class="fas fa-print"></i>
+                Print All Payslips
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+
+    <div class="table-card">
+
+        <h3>Payslip List</h3>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Emp ID</th>
+                    <th>Employee</th>
+                    <th>Position</th>
+                    <th>Dept</th>
+                    <th>Net Pay</th>
+                    <th>Status</th>
+                    <th>Payslip</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>EMP-001</td>
+                    <td>Maria C. Santos</td>
+                    <td>Sales Manager</td>
+                    <td>Sales</td>
+                    <td class="green">₱52,712.80</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-001')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-002</td>
+                    <td>Roberto P. Cruz</td>
+                    <td>IT Specialist</td>
+                    <td>IT</td>
+                    <td class="green">₱43,479.06</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-002')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-003</td>
+                    <td>Ana B. Reyes</td>
+                    <td>Accountant</td>
+                    <td>Finance</td>
+                    <td class="green">₱41,218.70</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-003')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-004</td>
+                    <td>Jose M. Bautista</td>
+                    <td>Warehouse Staff</td>
+                    <td>Warehouse</td>
+                    <td class="green">₱24,588.13</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-004')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-005</td>
+                    <td>Carmen R. Flores</td>
+                    <td>HR Officer</td>
+                    <td>HR</td>
+                    <td class="green">₱39,226.60</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-005')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-006</td>
+                    <td>Miguel T. Torres</td>
+                    <td>Sales Rep</td>
+                    <td>Sales</td>
+                    <td class="green">₱25,055.68</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-006')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-007</td>
+                    <td>Liza P. Gomez</td>
+                    <td>Finance Analyst</td>
+                    <td>Finance</td>
+                    <td class="green">₱40,409.27</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-007')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>EMP-010</td>
+                    <td>Ricardo L. Mendez</td>
+                    <td>Purchasing Officer</td>
+                    <td>Procurement</td>
+                    <td class="green">₱39,093.64</td>
+                    <td>
+                        <span class="status success">
+                            READY
+                        </span>
+                    </td>
+                    <td>
+                        <button class="table-btn primary" onclick="viewPayslip('EMP-010')">
+                            <i class="fas fa-print"></i>
+                            View
+                        </button>
+
+                        <button class="table-btn secondary">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+    <script src="../../assets/js/payslip-data.js"></script>
+    <script src="../../assets/js/payslip.js"></script>
+    <script src="../../assets/js/dashboard.js"></script>
+
+
+    <!-- Apply role-based sidebar restrictions now that the DOM exists -->
+    <script>
+        applySidebarAccess(currentSession);
+    </script>
+</body>
+</html>
