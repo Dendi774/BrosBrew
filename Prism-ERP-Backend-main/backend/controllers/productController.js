@@ -37,15 +37,6 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-export const updateStock = async (req, res) => {
-  try {
-    await ProductModel.updateStock(req.params.id, req.body.quantity);
-    res.status(200).json({ message: 'Stock updated' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 export const deleteProduct = async (req, res) => {
   try {
     await ProductModel.deleteProduct(req.params.id);

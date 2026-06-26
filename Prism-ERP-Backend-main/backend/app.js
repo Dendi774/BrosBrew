@@ -13,6 +13,7 @@ import payrollRoutes from './routes/payrollRoutes.js';
 import salesReturnRoutes from './routes/salesReturnRoutes.js';
 import receiptRoutes from './routes/receiptRoutes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
+import productCatalogRoutes from './routes/productCatalogRoutes.js';
 import cors from "cors";
 
 
@@ -42,6 +43,7 @@ app.use('/api/v1/payroll', payrollRoutes);
 app.use('/api/v1/returns', salesReturnRoutes);
 app.use('/api/v1/receipts', receiptRoutes);
 app.use('/api/v1/invoices', invoiceRoutes);
+app.use('/api/v1/productCatalog', productCatalogRoutes);
 
 
 app.listen(process.env.PORT || 3000, () => {
