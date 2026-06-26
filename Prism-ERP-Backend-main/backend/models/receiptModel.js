@@ -1,4 +1,5 @@
 import pool from '../database/db.js';
+import * as SalesOrderModel from './salesOrderModel.js';
 
 // Generates a short, unique-ish receipt number
 const generateReceiptNumber = () => {
@@ -15,16 +16,6 @@ export const getAllReceipts = async () => {
 };
 
 // Get one receipt by ID
-export const getReceiptById = async (id) => {
-  const [rows] = await pool.query(
-    'SELECT * FROM receipts WHERE receipt_id = ?',
-    [id]
-  );
-  return rows[0] || null;
-};
-
-// Records a payment against an invoice: creates the receipt row,
-// then updates the invoice's paid amount + status accordingly.
 export const createReceipt = async (data) => {
   const { invoice_id, amount, method, processed_by } = data;
 
@@ -37,8 +28,6 @@ export const createReceipt = async (data) => {
   try {
     await connection.beginTransaction();
 
-    // Lock the invoice row while we read/update it, to avoid race conditions
-    // if two payments come in at the same time
     const [invoiceRows] = await connection.query(
       'SELECT * FROM invoices WHERE invoice_id = ? FOR UPDATE',
       [invoice_id]
@@ -53,7 +42,6 @@ export const createReceipt = async (data) => {
       throw new Error('Payment exceeds remaining invoice balance');
     }
 
-    // Determine new invoice status based on how much has now been paid
     let newStatus = 'Partial';
     if (newPaid >= Number(invoice.amount)) newStatus = 'Paid';
     else if (newPaid === 0) newStatus = 'Unpaid';
@@ -70,6 +58,24 @@ export const createReceipt = async (data) => {
       `UPDATE invoices SET paid = ?, status = ? WHERE invoice_id = ?`,
       [newPaid, newStatus, invoice_id]
     );
+
+    // If this payment just fully settled the invoice, move the linked
+    // order from 'Pending' into 'Preparing' — but only if it's still
+    // 'Pending'. If it's already Preparing/Completed/Cancelled, leave it
+    // alone (e.g. don't un-cancel a cancelled order just because a late
+    // payment came in).
+    if (newStatus === 'Paid') {
+    // Look up the order linked to this invoice, then route the status
+    // change through updateOrderStatus so inventory deduction happens too
+    const [orderRows] = await connection.query(
+        'SELECT order_id, status FROM sales_orders WHERE invoice_id = ?',
+        [invoice_id]
+    );
+
+    if (orderRows.length > 0 && orderRows[0].status === 'Pending') {
+        await SalesOrderModel.updateOrderStatus(orderRows[0].order_id, 'Preparing', connection);
+    }
+    }
 
     await connection.commit();
     return receiptNumber;

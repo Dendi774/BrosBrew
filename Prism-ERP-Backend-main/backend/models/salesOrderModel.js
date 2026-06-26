@@ -33,7 +33,7 @@ export const getOrderById = async (id) => {
   // Join order items with products so we get product_name/sku, not just IDs
   const [items] = await pool.query(
     `SELECT soi.order_item_id, soi.product_id, soi.quantity, soi.unit_price, soi.subtotal,
-            p.product_name, p.sku
+            p.product_name
      FROM sales_order_items soi
      JOIN products p ON soi.product_id = p.product_id
      WHERE soi.order_id = ?`,
@@ -74,7 +74,7 @@ export const createOrder = async (data) => {
     // Look up current price + stock for every product being ordered
     const productIds = items.map((i) => i.product_id);
     const [products] = await connection.query(
-      'SELECT product_id, price, stock_quantity FROM products WHERE product_id IN (?)',
+      'SELECT product_id, price FROM products WHERE product_id IN (?)',
       [productIds]
     );
 
@@ -91,11 +91,6 @@ export const createOrder = async (data) => {
 
       if (!item.quantity || item.quantity <= 0) {
         throw new Error(`Invalid quantity for product ${item.product_id}`);
-      }
-      if (product.stock_quantity < item.quantity) {
-        throw new Error(
-          `Insufficient stock for product ${item.product_id} (have ${product.stock_quantity}, need ${item.quantity})`
-        );
       }
 
       const subtotal = Number(product.price) * item.quantity;
@@ -136,11 +131,6 @@ export const createOrder = async (data) => {
          VALUES (?, ?, ?, ?, ?)`,
         [orderId, line.product_id, line.quantity, line.unit_price, line.subtotal]
       );
-
-      await connection.query(
-        `UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?`,
-        [line.quantity, line.product_id]
-      );
     }
 
     // Everything succeeded — commit all inserts/updates together
@@ -155,12 +145,64 @@ export const createOrder = async (data) => {
   }
 };
 
-// Updates just the status field of an existing order (e.g. Pending -> Completed)
-export const updateOrderStatus = async (id, status) => {
-  const [result] = await pool.query(
+// Deducts ingredient stock for every product in this order, based on each
+// product's recipe (product_ingredients). Runs inside whatever connection
+// is passed in, so it can be part of a larger transaction if needed.
+export const deductInventoryForPreparingOrder = async (orderId, connection = pool) => {
+  const [orderItems] = await connection.query(
+    'SELECT product_id, quantity FROM sales_order_items WHERE order_id = ?',
+    [orderId]
+  );
+
+  for (const item of orderItems) {
+    const [recipe] = await connection.query(
+      'SELECT ingredient_id, quantity_used FROM product_ingredients WHERE product_id = ?',
+      [item.product_id]
+    );
+
+    for (const ingredient of recipe) {
+      const totalUsed = Number(ingredient.quantity_used) * item.quantity;
+
+      await connection.query(
+        `UPDATE ingredients SET quantity_in_stock = quantity_in_stock - ?
+         WHERE ingredient_id = ?`,
+        [totalUsed, ingredient.ingredient_id]
+      );
+
+      await connection.query(
+        `INSERT INTO inventory_transactions
+           (ingredient_id, order_id, transaction_type, quantity, notes, created_at)
+         VALUES (?, ?, 'Sale', ?, ?, NOW())`,
+        [ingredient.ingredient_id, orderId, totalUsed, `Order #${orderId} prepared`]
+      );
+    }
+  }
+};
+
+// Updates an order's status, and triggers inventory deduction exactly once
+// if the order is transitioning into 'Preparing'. Accepts an optional
+// connection so it can run inside an existing transaction (e.g. when
+// called from receiptModel after a payment fully settles the invoice).
+export const updateOrderStatus = async (id, status, connection = pool) => {
+  const [result] = await connection.query(
     'UPDATE sales_orders SET status = ? WHERE order_id = ?',
     [status, id]
   );
+
+  const [rows] = await connection.query(
+    'SELECT inventory_deducted FROM sales_orders WHERE order_id = ?',
+    [id]
+  );
+
+  if (status === 'Preparing' && rows[0].inventory_deducted === 0) {
+    await deductInventoryForPreparingOrder(id, connection);
+
+    await connection.query(
+      'UPDATE sales_orders SET inventory_deducted = ? WHERE order_id = ?',
+      [true, id]
+    );
+  }
+
   return result;
 };
 
@@ -172,3 +214,68 @@ export const deleteOrder = async (id) => {
   );
   return result;
 };
+
+/*
+// function for deducting inventory when an order is marked as "Preparing"
+async function deductInventoryForPreparingOrder(orderId) {
+    const [ingredients] = await pool.query(`
+        SELECT 
+            i.ingredient_id,
+            pi.quantity_used,
+            soi.quantity
+
+        FROM ingredients i
+
+        JOIN product_ingredients pi
+        ON i.ingredient_id = pi.ingredient_id
+
+        JOIN sales_order_items soi
+        ON pi.product_id = soi.product_id
+
+        WHERE soi.order_id = ?
+
+        `, [orderId]);
+
+        for (const item of ingredients) {
+        const totalUsed = item.quantity_used * item.quantity;
+            // deduct stock
+
+            await pool.query(`
+
+            UPDATE ingredients
+
+            SET quantity_in_stock =
+            quantity_in_stock - ?
+
+            WHERE ingredient_id = ?
+
+            `,
+            [
+            totalUsed,
+            item.ingredient_id
+            ]);
+
+            // create transaction record
+            await pool.query(`
+                INSERT INTO inventory_transactions
+                (
+                ingredient_id,
+                order_id,
+                transaction_type,
+                quantity,
+                notes
+                )
+
+                VALUES
+                (?,?,'Sale',?,?)
+            `,
+            [
+            item.ingredient_id,
+            orderId,
+            -totalUsed,
+            'Order preparation'
+            ]);
+        }
+};
+
+*/

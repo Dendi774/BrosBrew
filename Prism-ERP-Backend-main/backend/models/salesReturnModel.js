@@ -31,11 +31,9 @@ export const getReturnById = async (id) => {
   return { ...returnRows[0], items };
 };
 
-// Helper: sums how many units of a given order_item have already been
-// returned across all PRIOR return requests (excluding rejected ones,
-// since a rejected return never actually took stock/refund effect).
-// This is what prevents returning more than was ordered across multiple
-// separate return requests, not just within a single request.
+// Sums how many units of each order_item have already been returned
+// across all PRIOR non-rejected returns, so we can enforce the real
+// remaining returnable quantity across multiple separate requests.
 const getAlreadyReturnedQuantities = async (connection, orderItemIds) => {
   const [rows] = await connection.query(
     `SELECT sri.order_item_id, COALESCE(SUM(sri.quantity), 0) AS total_returned
@@ -51,13 +49,26 @@ const getAlreadyReturnedQuantities = async (connection, orderItemIds) => {
   return map;
 };
 
-// Creates a new return request for items belonging to an existing order.
-// Validates quantities against what's actually still returnable (ordered
-// minus everything already returned in prior requests), then immediately
-// restocks the products and reduces the linked invoice's amount owed.
+// Looks up each ingredient + quantity that the recipe for a product calls
+// for, scaled by how many units of that product are being returned.
+// Used to log how much ingredient was wasted by the return.
+const getIngredientUsageForProduct = async (connection, productId, productQty) => {
+  const [recipe] = await connection.query(
+    'SELECT ingredient_id, quantity_used FROM product_ingredients WHERE product_id = ?',
+    [productId]
+  );
+
+  return recipe.map((r) => ({
+    ingredient_id: r.ingredient_id,
+    quantity: Number(r.quantity_used) * productQty,
+  }));
+};
+
+// Creates a new return REQUEST only. No stock, ingredient, or invoice
+// changes happen here — those only take effect once the return is
+// actually approved (see updateReturnStatus).
 export const createReturn = async (data) => {
   const { order_id, reason, items } = data;
-  // items = [{ order_item_id, quantity }, ...]
 
   if (!order_id || !items || items.length === 0) {
     throw new Error('order_id and at least one item are required');
@@ -67,6 +78,19 @@ export const createReturn = async (data) => {
 
   try {
     await connection.beginTransaction();
+
+    // Only completed orders are eligible for returns — you can't return
+    // something that was never finished/delivered yet
+    const [orderRows] = await connection.query(
+      'SELECT status FROM sales_orders WHERE order_id = ?',
+      [order_id]
+    );
+    if (orderRows.length === 0) {
+      throw new Error('Order not found');
+    }
+    if (orderRows[0].status !== 'Completed') {
+      throw new Error('Only completed orders can be returned');
+    }
 
     const orderItemIds = items.map((i) => i.order_item_id);
     const [orderItems] = await connection.query(
@@ -92,19 +116,14 @@ export const createReturn = async (data) => {
       }
       if (item.quantity > returnableQty) {
         throw new Error(
-          `Cannot return ${item.quantity} of item ${item.order_item_id} — only ${returnableQty} remaining returnable (already returned ${alreadyReturned} of ${orderItem.quantity})`
+          `Cannot return ${item.quantity} of item ${item.order_item_id} — only ${returnableQty} remaining returnable`
         );
       }
 
       const subtotal = Number(orderItem.unit_price) * item.quantity;
       refundAmount += subtotal;
 
-      return {
-        order_item_id: item.order_item_id,
-        product_id: orderItem.product_id,
-        quantity: item.quantity,
-        subtotal,
-      };
+      return { order_item_id: item.order_item_id, quantity: item.quantity, subtotal };
     });
 
     const returnNumber = generateReturnNumber();
@@ -122,44 +141,6 @@ export const createReturn = async (data) => {
          VALUES (?, ?, ?, ?)`,
         [returnId, line.order_item_id, line.quantity, line.subtotal]
       );
-
-      // Restock immediately — returned units go back into available inventory
-      // as soon as the return is logged, rather than waiting on a status change
-      await connection.query(
-        'UPDATE products SET stock_quantity = stock_quantity + ? WHERE product_id = ?',
-        [line.quantity, line.product_id]
-      );
-    }
-
-    // The order's invoice now covers fewer goods, so reduce what's owed.
-    // Lock the invoice row first since receipts could be modifying it concurrently.
-    const [orderRows] = await connection.query(
-      'SELECT invoice_id FROM sales_orders WHERE order_id = ?',
-      [order_id]
-    );
-    const invoiceId = orderRows[0]?.invoice_id;
-
-    if (invoiceId) {
-      const [invoiceRows] = await connection.query(
-        'SELECT * FROM invoices WHERE invoice_id = ? FOR UPDATE',
-        [invoiceId]
-      );
-      const invoice = invoiceRows[0];
-
-      const newAmount = Math.max(0, Number(invoice.amount) - refundAmount);
-      const paid = Number(invoice.paid);
-
-      // Recalculate status against the new, smaller amount owed
-      let newStatus = invoice.status;
-      if (paid >= newAmount && newAmount > 0) newStatus = 'Paid';
-      else if (paid === 0) newStatus = 'Unpaid';
-      else if (paid > 0 && paid < newAmount) newStatus = 'Partial';
-      else if (newAmount === 0) newStatus = 'Paid';
-
-      await connection.query(
-        'UPDATE invoices SET amount = ?, status = ? WHERE invoice_id = ?',
-        [newAmount, newStatus, invoiceId]
-      );
     }
 
     await connection.commit();
@@ -172,12 +153,23 @@ export const createReturn = async (data) => {
   }
 };
 
-// Updates a return's status only. Stock and invoice adjustments now happen
-// at creation time (see createReturn), so this function's job is narrower:
-// - Moving to 'Rejected' REVERSES the stock/invoice changes, since the
-//   return turned out not to be valid after all.
-// - Any other status change (Processing, Approved, Refunded) is just a
-//   label update and does not touch stock or the invoice again.
+// Updates a return's status. The real work happens on specific transitions:
+//
+// -> 'Approved' (from a non-approved state):
+//      - Always reduce the linked invoice's amount owed by refund_amount,
+//        since the customer owes less regardless of order status
+//      - Check the ORDER's status:
+//          - 'Pending'   -> ingredients were never deducted yet, so no
+//            stock/ingredient change and nothing to log
+//          - 'Preparing' / 'Completed' -> ingredients were already
+//            consumed making the drink and can't be reclaimed, so log
+//            each affected ingredient as 'Waste' in inventory_transactions
+//            (this does not change ingredients.quantity_in_stock — it's
+//            already gone, this is just an audit record of the loss)
+//
+// -> 'Rejected' (from 'Approved'):
+//      - Reverses the invoice adjustment made above
+//      - Deletes any 'Waste' inventory_transactions rows logged for this return
 export const updateReturnStatus = async (id, status) => {
   const connection = await pool.getConnection();
 
@@ -189,12 +181,38 @@ export const updateReturnStatus = async (id, status) => {
       [id]
     );
     if (returnRows.length === 0) throw new Error('Return not found');
-
     const currentReturn = returnRows[0];
 
-    // Only act if we're newly transitioning INTO 'Rejected' from a non-rejected state
-    if (status === 'Rejected' && currentReturn.status !== 'Rejected') {
-      const [items] = await connection.query(
+    // ---- Transition INTO 'Approved' ----
+    if (status === 'Approved' && currentReturn.status !== 'Approved') {
+      const [order] = await connection.query(
+        'SELECT invoice_id FROM sales_orders WHERE order_id = ?',
+        [currentReturn.order_id]
+      );
+      const invoiceId = order[0].invoice_id;
+
+      // Reduce the invoice amount owed by the refund
+      const [invoiceRows] = await connection.query(
+        'SELECT * FROM invoices WHERE invoice_id = ? FOR UPDATE',
+        [invoiceId]
+      );
+      const invoice = invoiceRows[0];
+      const newAmount = Math.max(0, Number(invoice.amount) - Number(currentReturn.refund_amount));
+      const paid = Number(invoice.paid);
+
+      let newInvoiceStatus = invoice.status;
+      if (newAmount === 0 || paid >= newAmount) newInvoiceStatus = 'Paid';
+      else if (paid === 0) newInvoiceStatus = 'Unpaid';
+      else newInvoiceStatus = 'Partial';
+
+      await connection.query(
+        'UPDATE invoices SET amount = ?, status = ? WHERE invoice_id = ?',
+        [newAmount, newInvoiceStatus, invoiceId]
+      );
+
+      // Order is always 'Completed' at this point (enforced in createReturn),
+      // so ingredients were already consumed — always log as Waste
+      const [returnItems] = await connection.query(
         `SELECT sri.quantity, soi.product_id
          FROM sales_return_items sri
          JOIN sales_order_items soi ON sri.order_item_id = soi.order_item_id
@@ -202,20 +220,36 @@ export const updateReturnStatus = async (id, status) => {
         [id]
       );
 
-      // Take the restocked units back out, since the return is being denied
-      for (const item of items) {
-        await connection.query(
-          'UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?',
-          [item.quantity, item.product_id]
+      for (const item of returnItems) {
+        const ingredientUsages = await getIngredientUsageForProduct(
+          connection,
+          item.product_id,
+          item.quantity
         );
-      }
 
-      // Restore the invoice amount that was previously reduced by this return
-      const [orderRows] = await connection.query(
+        for (const usage of ingredientUsages) {
+          await connection.query(
+            `INSERT INTO inventory_transactions
+               (ingredient_id, order_id, transaction_type, quantity, notes, created_at)
+             VALUES (?, ?, 'Waste', ?, ?, NOW())`,
+            [
+              usage.ingredient_id,
+              currentReturn.order_id,
+              usage.quantity,
+              `Sales return ${currentReturn.return_number}`,
+            ]
+          );
+        }
+      }
+    }
+
+    // ---- Transition INTO 'Rejected' from 'Approved' (reverse everything) ----
+    if (status === 'Rejected' && currentReturn.status === 'Approved') {
+      const [order] = await connection.query(
         'SELECT invoice_id FROM sales_orders WHERE order_id = ?',
         [currentReturn.order_id]
       );
-      const invoiceId = orderRows[0]?.invoice_id;
+      const invoiceId = order[0]?.invoice_id;
 
       if (invoiceId) {
         const [invoiceRows] = await connection.query(
@@ -223,20 +257,24 @@ export const updateReturnStatus = async (id, status) => {
           [invoiceId]
         );
         const invoice = invoiceRows[0];
-
         const restoredAmount = Number(invoice.amount) + Number(currentReturn.refund_amount);
         const paid = Number(invoice.paid);
 
-        let newStatus = invoice.status;
-        if (paid >= restoredAmount) newStatus = 'Paid';
-        else if (paid === 0) newStatus = 'Unpaid';
-        else newStatus = 'Partial';
+        let newInvoiceStatus = invoice.status;
+        if (paid >= restoredAmount) newInvoiceStatus = 'Paid';
+        else if (paid === 0) newInvoiceStatus = 'Unpaid';
+        else newInvoiceStatus = 'Partial';
 
         await connection.query(
           'UPDATE invoices SET amount = ?, status = ? WHERE invoice_id = ?',
-          [restoredAmount, newStatus, invoiceId]
+          [restoredAmount, newInvoiceStatus, invoiceId]
         );
       }
+
+      await connection.query(
+        `DELETE FROM inventory_transactions WHERE order_id = ? AND notes = ?`,
+        [currentReturn.order_id, `Sales return ${currentReturn.return_number}`]
+      );
     }
 
     await connection.query(
