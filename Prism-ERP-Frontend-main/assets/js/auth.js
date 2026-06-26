@@ -9,20 +9,27 @@
 const AUTH_STORAGE_KEY = "prismErpSession";
 
 // Demo user directory: username -> { password, role, name, title }
+// user_id / employee_id must match real rows in the `users` and
+// `employees` tables — this is what links attendance/leave records
+// to the correct account once a real login replaces this demo map.
 const DEMO_USERS = {
     "manager@brosbrew.com": {
         password: "manager123",
         role: "manager",
         name: "Maria Santos",
         title: "Operations Manager",
-        initials: "MS"
+        initials: "MS",
+        user_id: 1,
+        employee_id: null // managers aren't required to have an employee row
     },
     "employee@brosbrew.com": {
         password: "employee123",
         role: "employee",
         name: "Juan Dela Cruz",
         title: "Staff Employee",
-        initials: "JD"
+        initials: "JD",
+        user_id: 1,
+        employee_id: 1
     }
 };
 
@@ -66,10 +73,49 @@ function login(username, password) {
         name: user.name,
         title: user.title,
         initials: user.initials,
+        user_id: user.user_id,
+        employee_id: user.employee_id,
         loginAt: Date.now()
     });
 
     return { ok: true };
+}
+
+/* ---------------- API helper ----------------
+   Wraps fetch() so every request to the backend automatically
+   carries the signed-in user's identity. The backend uses these
+   headers (see middleware/auth.js) to scope/own attendance and
+   leave-request data to the correct account. */
+
+const API_BASE_URL = "http://localhost:5500/api/v1";
+
+async function apiFetch(path, options = {}) {
+    const session = getSession();
+    const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+    };
+
+    if (session) {
+        if (session.user_id) headers["x-user-id"] = session.user_id;
+        if (session.employee_id) headers["x-employee-id"] = session.employee_id;
+        if (session.role) headers["x-role"] = session.role;
+    }
+
+    const res = await fetch(API_BASE_URL + path, { ...options, headers });
+    let data = null;
+    try {
+        data = await res.json();
+    } catch (e) {
+        // no JSON body
+    }
+
+    if (!res.ok) {
+        const message = (data && data.message) || `Request failed (${res.status})`;
+        throw new Error(message);
+    }
+
+    return data;
 }
 
 function logout() {

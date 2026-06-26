@@ -259,7 +259,7 @@
 
             <div>
                 <h1>Leave Requests</h1>
-                <p>6 requests</p>
+                <p id="leaveListTitle">My Leave Requests</p>
             </div>
 
         </div>
@@ -268,25 +268,10 @@
         <div class="action-bar">
 
             <div class="filter-group">
-
-                <select>
-                    <option>All Status</option>
-                    <option>Approved</option>
-                    <option>Pending</option>
-                    <option>Rejected</option>
-                </select>
-
-                <select>
-                    <option>All Types</option>
-                    <option>Vacation Leave</option>
-                    <option>Sick Leave</option>
-                    <option>Emergency Leave</option>
-                    <option>Maternity Leave</option>
-                </select>
-
+                <!-- Filters can be added here later -->
             </div>
 
-            <button class="add-btn">
+            <button class="add-btn" id="fileLeaveBtn">
                 <i class="fas fa-plus"></i>
                 File Leave
             </button>
@@ -300,139 +285,96 @@
 
             <table>
 
-                <thead>
+                <thead id="leaveTableHead">
                     <tr>
                         <th>Request #</th>
-                        <th>Employee</th>
-                        <th>Dept</th>
+                        <th class="manager-only-col">Employee</th>
                         <th>Leave Type</th>
                         <th>From</th>
                         <th>To</th>
-                        <th>Days</th>
                         <th>Reason</th>
                         <th>Status</th>
-                        <th>Reviewed By</th>
+                        <th class="manager-only-col">Action</th>
                     </tr>
                 </thead>
 
-                <tbody>
-
-                    <tr>
-                        <td>LR-2406-021</td>
-                        <td>Miguel T. Torres</td>
-                        <td>Sales</td>
-                        <td>Vacation Leave</td>
-                        <td>Jun 13, 2026</td>
-                        <td>Jun 14, 2026</td>
-                        <td>2</td>
-                        <td>Family trip</td>
-                        <td>
-                            <span class="status success">
-                                APPROVED
-                            </span>
-                        </td>
-                        <td>Carmen Flores</td>
-                    </tr>
-
-                    <tr>
-                        <td>LR-2406-020</td>
-                        <td>Andres K. Villanueva</td>
-                        <td>Logistics</td>
-                        <td>Sick Leave</td>
-                        <td>Jun 12, 2026</td>
-                        <td>Jun 13, 2026</td>
-                        <td>2</td>
-                        <td>Flu / fever</td>
-                        <td>
-                            <span class="status success">
-                                APPROVED
-                            </span>
-                        </td>
-                        <td>Carmen Flores</td>
-                    </tr>
-
-                    <tr>
-                        <td>LR-2406-019</td>
-                        <td>Liza P. Gomez</td>
-                        <td>Finance</td>
-                        <td>Emergency Leave</td>
-                        <td>Jun 20, 2026</td>
-                        <td>Jun 20, 2026</td>
-                        <td>1</td>
-                        <td>Family emergency</td>
-                        <td>
-                            <span class="status warning">
-                                PENDING
-                            </span>
-                        </td>
-                        <td>—</td>
-                    </tr>
-
-                    <tr>
-                        <td>LR-2406-018</td>
-                        <td>Ricardo L. Mendez</td>
-                        <td>Procurement</td>
-                        <td>Vacation Leave</td>
-                        <td>Jul 1, 2026</td>
-                        <td>Jul 5, 2026</td>
-                        <td>5</td>
-                        <td>Annual leave</td>
-                        <td>
-                            <span class="status warning">
-                                PENDING
-                            </span>
-                        </td>
-                        <td>—</td>
-                    </tr>
-
-                    <tr>
-                        <td>LR-2406-017</td>
-                        <td>Roberto P. Cruz</td>
-                        <td>IT</td>
-                        <td>Sick Leave</td>
-                        <td>Jun 5, 2026</td>
-                        <td>Jun 5, 2026</td>
-                        <td>1</td>
-                        <td>Medical appointment</td>
-                        <td>
-                            <span class="status success">
-                                APPROVED
-                            </span>
-                        </td>
-                        <td>Carmen Flores</td>
-                    </tr>
-
-                    <tr>
-                        <td>LR-2406-016</td>
-                        <td>Norma S. dela Paz</td>
-                        <td>Admin</td>
-                        <td>Vacation Leave</td>
-                        <td>May 28, 2026</td>
-                        <td>May 30, 2026</td>
-                        <td>3</td>
-                        <td>Personal</td>
-                        <td>
-                            <span class="status danger">
-                                REJECTED
-                            </span>
-                        </td>
-                        <td>Carmen Flores</td>
-                    </tr>
-
+                <tbody id="leaveTableBody">
+                    <tr><td colspan="8">Loading…</td></tr>
                 </tbody>
 
             </table>
 
         </div>
 
+        <!-- FILE LEAVE MODAL -->
+        <div class="modal" id="leaveModal">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h3>File a Leave Request</h3>
+                    <button class="icon-btn" id="closeLeaveModalBtn"><i class="fas fa-xmark"></i></button>
+                </div>
+
+                <form id="leaveRequestForm">
+
+                    <div class="form-group">
+                        <label for="leaveType">Leave Type</label>
+                        <select id="leaveType" required>
+                            <option value="" disabled selected>Select leave type</option>
+                            <option value="Vacation Leave">Vacation Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Emergency Leave">Emergency Leave</option>
+                            <option value="Maternity Leave">Maternity Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leaveStart">From</label>
+                        <input type="date" id="leaveStart" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leaveEnd">To</label>
+                        <input type="date" id="leaveEnd" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leaveReason">Reason</label>
+                        <textarea id="leaveReason" rows="3" required></textarea>
+                    </div>
+
+                    <div id="leaveFeedback" style="display:none; margin-bottom:12px; font-weight:500;"></div>
+
+                    <button type="submit" class="add-btn">Submit Request</button>
+
+                </form>
+
+            </div>
+        </div>
+
     </section>
 
 </main>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/attendance.js"></script>
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>
         applySidebarAccess(currentSession);
+
+        // Employees never see the "Employee" / "Action" columns — those are
+        // only meaningful when a manager is viewing everyone's requests.
+        if (currentSession.role !== "manager" && currentSession.role !== "admin") {
+            document.querySelectorAll(".manager-only-col").forEach(el => el.style.display = "none");
+        }
+
+        if (currentSession.role === "employee" && !currentSession.employee_id) {
+            document.getElementById("leaveTableBody").innerHTML =
+                '<tr><td colspan="8">Your account isn\'t linked to an employee record, so Leave Requests aren\'t available.</td></tr>';
+            document.getElementById("fileLeaveBtn").disabled = true;
+        } else {
+            initLeaveRequestPage(currentSession);
+        }
     </script>
 </body>
 </html>

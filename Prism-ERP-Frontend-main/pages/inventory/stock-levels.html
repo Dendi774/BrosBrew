@@ -321,14 +321,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 
                 <thead>
                     <tr>
-                        <th>SKU</th>
-                        <th>Product</th>
+                        <th>Ingredient ID</th>
+                        <th>Ingredient</th>
                         <th>Warehouse</th>
-                        <th>On Hand</th>
-                        <th>Reserved</th>
-                        <th>Available</th>
-                        <th>Min</th>
-                        <th>Max</th>
+                        <th>Available</th>>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -405,33 +401,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 
 </main>
 
-<script>
-
-const ctx = document.getElementById('stockChart');
-
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: [
-            'SKU-1042',
-            'SKU-0881',
-            'SKU-2201',
-            'SKU-1567',
-            'SKU-3301'
-        ],
-        datasets: [{
-            label: 'Available Stock',
-            data: [9,8,2,16,53]
-        }]
-    },
-    options: {
-        responsive:true,
-        maintainAspectRatio:false
-    }
-});
-
-</script>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets//js/stockLevels.js"></script>
 
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->

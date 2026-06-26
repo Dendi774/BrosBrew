@@ -273,7 +273,7 @@
             <!-- Optional filter area -->
         </div>
 
-        <button class="add-btn">
+        <button class="add-btn" id="recordStockInBtn">
             <i class="fas fa-plus"></i>
             Record Stock In
         </button>
@@ -292,11 +292,9 @@
                     <th>Ref #</th>
                     <th>Date</th>
                     <th>Supplier</th>
-                    <th>SKU</th>
-                    <th>Product</th>
+                    <th>Ingredient</th>
                     <th>Qty</th>
                     <th>Total Cost</th>
-                    <th>Received By</th>
                 </tr>
             </thead>
 
@@ -362,12 +360,95 @@
         </table>
 
     </div>
+    <div class="modal" id="stockModal">
+
+    <div class="modal-content">
+
+    <h2>Record Stock In</h2>
+
+
+    <label>Ingredient</label>
+
+    <select id="ingredientSelect">
+
+    <option value="">
+    Select Ingredient
+    </option>
+
+    </select>
+
+
+
+    <label>Unit</label>
+
+    <input 
+    id="unit"
+    readonly
+    >
+
+
+
+    <label>Quantity</label>
+
+    <input 
+    id="quantity"
+    type="number"
+    >
+
+
+
+    <label>Cost Per Unit</label>
+
+    <input 
+    id="cost"
+    readonly
+    >
+
+
+
+    <label>Supplier</label>
+
+    <input 
+    id="supplier"
+    value="ABC Company"
+    readonly
+    >
+
+
+
+    <label>Reorder Level</label>
+
+    <input 
+    id="reorder"
+    readonly
+    >
+
+
+
+    <label>Total Cost</label>
+
+    <input 
+    id="totalCost"
+    readonly
+    >
+
+
+
+    <button onclick="saveStockIn()">
+    Save Stock In
+    </button>
+
+
+    </div>
+
+    </div>
 
 </section>
 
 </main>
 
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/stockIn.js"></script>
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>

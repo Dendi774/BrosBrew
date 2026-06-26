@@ -272,9 +272,9 @@
 
                 <select class="category-filter">
                     <option>All Categories</option>
-                    <option>Office Supplies</option>
-                    <option>Electronics</option>
-                    <option>Food & Beverage</option>
+                    <option>Coffee</option>
+                    <option>Pastry</option>
+                    <option>Accessory</option>
                 </select>
 
             </div>
@@ -286,7 +286,7 @@
                     Export
                 </button>
 
-                <button class="add-btn">
+                <button class="add-btn" id="openAddProductBtn">
                     <i class="fas fa-plus"></i>
                     Add Product
                 </button>
@@ -307,118 +307,65 @@
                         <th>SKU</th>
                         <th>Product Name</th>
                         <th>Category</th>
-                        <th>Unit</th>
                         <th>Cost</th>
                         <th>Selling Price</th>
-                        <th>On Hand</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
-
-                    <tr>
-                        <td>SKU-1042</td>
-                        <td>A4 Bond Paper 500s</td>
-                        <td>Office Supplies</td>
-                        <td>Ream</td>
-                        <td>₱185.00</td>
-                        <td>₱220.00</td>
-                        <td>12</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-0881</td>
-                        <td>Ballpen Blue Box</td>
-                        <td>Office Supplies</td>
-                        <td>Box</td>
-                        <td>₱95.00</td>
-                        <td>₱130.00</td>
-                        <td>8</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-2201</td>
-                        <td>Toner Cartridge HP 85A</td>
-                        <td>Electronics</td>
-                        <td>Piece</td>
-                        <td>₱1,200.00</td>
-                        <td>₱1,600.00</td>
-                        <td>3</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-1567</td>
-                        <td>Stapler Long Arm</td>
-                        <td>Office Supplies</td>
-                        <td>Piece</td>
-                        <td>₱280.00</td>
-                        <td>₱380.00</td>
-                        <td>21</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-0995</td>
-                        <td>Correction Fluid 20ml</td>
-                        <td>Office Supplies</td>
-                        <td>Piece</td>
-                        <td>₱28.00</td>
-                        <td>₱45.00</td>
-                        <td>44</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-3301</td>
-                        <td>Laptop Stand Adjustable</td>
-                        <td>Electronics</td>
-                        <td>Piece</td>
-                        <td>₱850.00</td>
-                        <td>₱1,200.00</td>
-                        <td>65</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-4410</td>
-                        <td>Coffee 3-in-1 Box</td>
-                        <td>Food & Beverage</td>
-                        <td>Box</td>
-                        <td>₱148.00</td>
-                        <td>₱195.00</td>
-                        <td>130</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-5520</td>
-                        <td>Monitor 24" FHD IPS</td>
-                        <td>Electronics</td>
-                        <td>Piece</td>
-                        <td>₱8,200.00</td>
-                        <td>₱10,500.00</td>
-                        <td>18</td>
-                        <td><span class="status success">ACTIVE</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>SKU-6601</td>
-                        <td>Keyboard Mechanical</td>
-                        <td>Electronics</td>
-                        <td>Piece</td>
-                        <td>₱1,800.00</td>
-                        <td>₱2,400.00</td>
-                        <td>0</td>
-                        <td><span class="status inactive">INACTIVE</span></td>
-                    </tr>
-
+                    <!-- rows populated by productCatalog.js -->
                 </tbody>
 
             </table>
+
+        </div>
+
+        <!-- ADD / EDIT PRODUCT MODAL -->
+        <div class="modal" id="productModal">
+
+            <div class="modal-content">
+
+                <h2 id="productModalTitle">Add Product</h2>
+
+                <!-- holds the product_id when editing; empty when adding -->
+                <input type="hidden" id="product-id">
+
+                <label>Product Name</label>
+                <input type="text" id="product-name" placeholder="e.g. Caramel Macchiato">
+
+                <label>Category</label>
+                <select id="product-category">
+                    <option value="Coffee">Coffee</option>
+                    <option value="Pastry">Pastry</option>
+                    <option value="Accessory">Accessory</option>
+                </select>
+
+                <label>Selling Price (₱)</label>
+                <input type="number" id="product-price" placeholder="0.00" min="0" step="0.01">
+
+                <label>Cost (₱)</label>
+                <input type="number" id="product-cost" placeholder="0.00" min="0" step="0.01">
+
+                <label>Description</label>
+                <input type="text" id="product-description" placeholder="Short description (optional)">
+
+                <label>Image URL</label>
+                <input type="text" id="product-image-url" placeholder="https://... (optional)">
+
+                <label>Status</label>
+                <select id="product-status">
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                </select>
+
+                <div class="modal-footer">
+                    <button id="closeProductModalBtn">Cancel</button>
+                    <button id="saveProductBtn">Save Product</button>
+                </div>
+
+            </div>
 
         </div>
 

@@ -258,43 +258,9 @@
         <div class="page-header">
 
             <div>
-                <h1>Attendance Records</h1>
+                <h1 id="recordsTitle">Attendance Records</h1>
                 <p>Daily attendance history</p>
             </div>
-
-        </div>
-
-        <!-- ACTION BAR -->
-        <div class="action-bar">
-
-            <div class="filter-group">
-
-                <input
-                    type="text"
-                    class="search-input"
-                    placeholder="Search employee..."
-                >
-
-                <select>
-                    <option>All Departments</option>
-                    <option>Sales</option>
-                    <option>IT</option>
-                    <option>Finance</option>
-                    <option>Warehouse</option>
-                    <option>HR</option>
-                </select>
-
-                <input
-                    type="date"
-                    class="date-filter"
-                >
-
-            </div>
-
-            <button class="secondary-btn">
-                <i class="fas fa-download"></i>
-                Export
-            </button>
 
         </div>
 
@@ -310,7 +276,6 @@
                         <th>Date</th>
                         <th>Emp ID</th>
                         <th>Employee</th>
-                        <th>Dept</th>
                         <th>Time In</th>
                         <th>Time Out</th>
                         <th>Hours</th>
@@ -318,128 +283,8 @@
                     </tr>
                 </thead>
 
-                <tbody>
-
-                    <tr>
-                        <td>Jun 13, 2026</td>
-                        <td>EMP-001</td>
-                        <td>Maria C. Santos</td>
-                        <td>Sales</td>
-                        <td>07:58 AM</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>
-                            <span class="status success">
-                                PRESENT
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 13, 2026</td>
-                        <td>EMP-003</td>
-                        <td>Ana B. Reyes</td>
-                        <td>Finance</td>
-                        <td>09:34 AM</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>
-                            <span class="status warning">
-                                LATE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 13, 2026</td>
-                        <td>EMP-004</td>
-                        <td>Jose M. Bautista</td>
-                        <td>Warehouse</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>
-                            <span class="status danger">
-                                ABSENT
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 13, 2026</td>
-                        <td>EMP-006</td>
-                        <td>Miguel T. Torres</td>
-                        <td>Sales</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td>
-                            <span class="status purple">
-                                ON LEAVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 12, 2026</td>
-                        <td>EMP-001</td>
-                        <td>Maria C. Santos</td>
-                        <td>Sales</td>
-                        <td>07:55 AM</td>
-                        <td>05:03 PM</td>
-                        <td>9h 08m</td>
-                        <td>
-                            <span class="status success">
-                                PRESENT
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 12, 2026</td>
-                        <td>EMP-002</td>
-                        <td>Roberto P. Cruz</td>
-                        <td>IT</td>
-                        <td>08:15 AM</td>
-                        <td>06:45 PM</td>
-                        <td>10h 30m</td>
-                        <td>
-                            <span class="status success">
-                                PRESENT
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 12, 2026</td>
-                        <td>EMP-003</td>
-                        <td>Ana B. Reyes</td>
-                        <td>Finance</td>
-                        <td>08:05 AM</td>
-                        <td>05:00 PM</td>
-                        <td>8h 55m</td>
-                        <td>
-                            <span class="status success">
-                                PRESENT
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jun 11, 2026</td>
-                        <td>EMP-004</td>
-                        <td>Jose M. Bautista</td>
-                        <td>Warehouse</td>
-                        <td>08:00 AM</td>
-                        <td>05:00 PM</td>
-                        <td>9h 00m</td>
-                        <td>
-                            <span class="status success">
-                                PRESENT
-                            </span>
-                        </td>
-                    </tr>
-
+                <tbody id="attendanceTableBody">
+                    <tr><td colspan="7">Loading…</td></tr>
                 </tbody>
 
             </table>
@@ -450,10 +295,12 @@
 
 </main>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/attendance.js"></script>
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>
         applySidebarAccess(currentSession);
+        initRecordsPage(currentSession);
     </script>
 </body>
 </html>

@@ -258,7 +258,7 @@
 
             <div>
                 <h1>Time In</h1>
-                <p>Today — June 22, 2026</p>
+                <p id="currentDateLabel"></p>
             </div>
 
         </div>
@@ -267,33 +267,12 @@
         <div class="action-bar">
 
             <div class="filter-group">
-
-                <div class="stat-badge">
-                    On Time: <strong>5</strong>
-                </div>
-
-                <div class="stat-badge">
-                    Late: <strong>2</strong>
-                </div>
-
-                <div class="stat-badge">
-                    Absent: <strong>2</strong>
-                </div>
-
-                <div class="stat-badge">
-                    Not Yet In: <strong>3</strong>
-                </div>
-
+                <div class="stat-badge" id="currentStatusBox">Loading status…</div>
             </div>
 
             <div class="action-buttons">
 
-                <button class="secondary-btn">
-                    <i class="fas fa-download"></i>
-                    Export
-                </button>
-
-                <button class="add-btn">
+                <button class="add-btn" id="recordTimeInBtn" disabled>
                     <i class="fas fa-right-to-bracket"></i>
                     Record Time In
                 </button>
@@ -302,111 +281,28 @@
 
         </div>
 
+        <div id="attendanceFeedback" style="display:none; margin-bottom:16px; font-weight:500;"></div>
+
         <!-- TABLE -->
         <div class="table-card">
 
-            <h3>Today's Time-In Log</h3>
+            <h3>My Time-In History</h3>
 
             <table>
 
                 <thead>
                     <tr>
                         <th>Log #</th>
-                        <th>Emp ID</th>
-                        <th>Employee</th>
-                        <th>Department</th>
+                        <th>Date</th>
                         <th>Time In</th>
-                        <th>Method</th>
+                        <th>Time Out</th>
+                        <th>Hours</th>
                         <th>Status</th>
                     </tr>
                 </thead>
 
-                <tbody>
-
-                    <tr>
-                        <td>ATT-20260613-001</td>
-                        <td>EMP-001</td>
-                        <td>Maria C. Santos</td>
-                        <td>Sales</td>
-                        <td>07:58 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status success">ON TIME</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-002</td>
-                        <td>EMP-002</td>
-                        <td>Roberto P. Cruz</td>
-                        <td>IT</td>
-                        <td>08:15 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status success">ON TIME</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-003</td>
-                        <td>EMP-003</td>
-                        <td>Ana B. Reyes</td>
-                        <td>Finance</td>
-                        <td>09:34 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status warning">LATE</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-004</td>
-                        <td>EMP-005</td>
-                        <td>Carmen R. Flores</td>
-                        <td>HR</td>
-                        <td>07:58 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status success">ON TIME</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-005</td>
-                        <td>EMP-006</td>
-                        <td>Miguel T. Torres</td>
-                        <td>Sales</td>
-                        <td>08:02 AM</td>
-                        <td>Manual</td>
-                        <td>
-                            <span class="status success">ON TIME</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-006</td>
-                        <td>EMP-007</td>
-                        <td>Liza P. Gomez</td>
-                        <td>Finance</td>
-                        <td>08:00 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status success">ON TIME</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>ATT-20260613-007</td>
-                        <td>EMP-010</td>
-                        <td>Ricardo L. Mendez</td>
-                        <td>Procurement</td>
-                        <td>08:45 AM</td>
-                        <td>Biometric</td>
-                        <td>
-                            <span class="status warning">LATE</span>
-                        </td>
-                    </tr>
-
+                <tbody id="attendanceTableBody">
+                    <tr><td colspan="6">Loading…</td></tr>
                 </tbody>
 
             </table>
@@ -417,10 +313,20 @@
 
 </main>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/attendance.js"></script>
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>
         applySidebarAccess(currentSession);
+        document.getElementById("currentDateLabel").textContent =
+            "Today — " + new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+        if (!currentSession.employee_id) {
+            document.getElementById("currentStatusBox").textContent =
+                "Your account isn't linked to an employee record, so Time In isn't available.";
+        } else {
+            initTimeInPage(currentSession);
+        }
     </script>
 </body>
 </html>

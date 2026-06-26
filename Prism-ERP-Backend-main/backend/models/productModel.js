@@ -14,17 +14,16 @@ export const getProductById = async (id) => {
 };
 
 export const createProduct = async (data) => {
-  const { product_name, category, price, cost, unit, description, image_url, status } = data;
+  const { product_name, category, price, cost, description, image_url, status } = data;
   const [result] = await pool.query(
     `INSERT INTO products
-      (product_name, category, price, cost, unit, description, image_url, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (product_name, category, price, cost, description, image_url, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       product_name,
       category,
       price,
       cost,
-      unit ?? 'N/A',
       description ?? null,
       image_url ?? null,
       status ?? 'ACTIVE',
@@ -35,13 +34,13 @@ export const createProduct = async (data) => {
 };
 
 export const updateProduct = async (id, data) => {
-  const { product_name, category, price, cost, unit, description, image_url, status } = data;
+  const { product_name, category, price, cost, description, image_url, status } = data;
   const [result] = await pool.query(
     `UPDATE products
         SET product_name = ?, category = ?, price = ?, cost = ?,
-            unit = ?, description = ?, image_url = ?, status = ?
+            description = ?, image_url = ?, status = ?
       WHERE product_id = ?`,
-    [product_name, category, price, cost, unit, description, image_url, status, id]
+    [product_name, category, price, cost, description, image_url, status, id]
   );
   return result;
 };
