@@ -209,7 +209,7 @@
 
         <div>
             <h1>Payslip Generation</h1>
-            <p>Period: June 1–15, 2026</p>
+            <p id="periodHeading">Period: June 1–15, 2026</p>
         </div>
 
     </div>
@@ -220,35 +220,11 @@
 
         <div class="filter-group">
 
-            <select>
-                <option>June 1–15, 2026</option>
-                <option>June 16–30, 2026</option>
-                <option>July 1–15, 2026</option>
+            <select id="periodSelect">
+                <option value="period-1">June 1–15, 2026</option>
+                <option value="period-2">June 16–30, 2026</option>
+                <option value="period-3">July 1–15, 2026</option>
             </select>
-
-            <select>
-                <option>All Departments</option>
-                <option>Sales</option>
-                <option>IT</option>
-                <option>Finance</option>
-                <option>HR</option>
-                <option>Warehouse</option>
-                <option>Procurement</option>
-            </select>
-
-        </div>
-
-        <div class="action-buttons">
-
-            <button class="secondary-btn">
-                <i class="fas fa-download"></i>
-                Export
-            </button>
-
-            <button class="add-btn">
-                <i class="fas fa-print"></i>
-                Print All Payslips
-            </button>
 
         </div>
 
@@ -267,210 +243,72 @@
                     <th>Emp ID</th>
                     <th>Employee</th>
                     <th>Position</th>
-                    <th>Dept</th>
                     <th>Net Pay</th>
                     <th>Status</th>
                     <th>Payslip</th>
                 </tr>
             </thead>
 
-            <tbody>
-
-                <tr>
-                    <td>EMP-001</td>
-                    <td>Maria C. Santos</td>
-                    <td>Sales Manager</td>
-                    <td>Sales</td>
-                    <td class="green">₱52,712.80</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-001')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-002</td>
-                    <td>Roberto P. Cruz</td>
-                    <td>IT Specialist</td>
-                    <td>IT</td>
-                    <td class="green">₱43,479.06</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-002')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-003</td>
-                    <td>Ana B. Reyes</td>
-                    <td>Accountant</td>
-                    <td>Finance</td>
-                    <td class="green">₱41,218.70</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-003')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-004</td>
-                    <td>Jose M. Bautista</td>
-                    <td>Warehouse Staff</td>
-                    <td>Warehouse</td>
-                    <td class="green">₱24,588.13</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-004')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-005</td>
-                    <td>Carmen R. Flores</td>
-                    <td>HR Officer</td>
-                    <td>HR</td>
-                    <td class="green">₱39,226.60</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-005')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-006</td>
-                    <td>Miguel T. Torres</td>
-                    <td>Sales Rep</td>
-                    <td>Sales</td>
-                    <td class="green">₱25,055.68</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-006')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-007</td>
-                    <td>Liza P. Gomez</td>
-                    <td>Finance Analyst</td>
-                    <td>Finance</td>
-                    <td class="green">₱40,409.27</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-007')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>EMP-010</td>
-                    <td>Ricardo L. Mendez</td>
-                    <td>Purchasing Officer</td>
-                    <td>Procurement</td>
-                    <td class="green">₱39,093.64</td>
-                    <td>
-                        <span class="status success">
-                            READY
-                        </span>
-                    </td>
-                    <td>
-                        <button class="table-btn primary" onclick="viewPayslip('EMP-010')">
-                            <i class="fas fa-print"></i>
-                            View
-                        </button>
-
-                        <button class="table-btn secondary">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </td>
-                </tr>
-
+            <tbody id="payslipTableBody">
+                <!-- rows injected by payslip.js -->
             </tbody>
 
         </table>
 
     </div>
 
+    <!-- PAYSLIP MODAL -->
+    <div class="modal" id="payslipModal">
+        <div class="modal-content">
+            <div id="printArea">
+
+                <div class="modal-header">
+                    <h2>Payslip</h2>
+                    <p id="empPeriod">Period: June 1–15, 2026</p>
+                </div>
+
+                <div class="employee-info">
+                    <div><strong>Employee ID:</strong> <span id="empId"></span></div>
+                    <div><strong>Name:</strong> <span id="empName"></span></div>
+                    <div><strong>Position:</strong> <span id="empPosition"></span></div>
+                </div>
+
+                <div class="earnings">
+                    <h3>Earnings</h3>
+                    <p><span>Basic Pay (semi-monthly)</span><span id="basicPay"></span></p>
+                    <p><span>Overtime Pay</span><span id="overtimePay"></span></p>
+                    <p class="gross"><span>Gross Pay</span><span id="grossPay"></span></p>
+                </div>
+
+                <div class="deductions">
+                    <h3>Deductions</h3>
+                    <div id="deductionList"></div>
+                    <p class="totalDeduction"><span>Total Deductions</span><span id="totalDeduction"></span></p>
+                </div>
+
+                <div class="net-pay">
+                    <span>Net Pay</span>
+                    <strong id="netPay"></strong>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="closePayslip()">Close</button>
+                <button onclick="printPayslip()">
+                    <i class="fas fa-print"></i>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+
 </section>
 
-    <script src="../../assets/js/payslip-data.js"></script>
+    <script src="../../assets/js/payroll-calc.js"></script>
     <script src="../../assets/js/payslip.js"></script>
     <script src="../../assets/js/dashboard.js"></script>
+
 
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->

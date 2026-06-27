@@ -98,12 +98,18 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                 </li>
 
                 <li data-module="inventory">
-                    <a href="../../pages/inventory/stock-in.html">
+                    <a href="../../pages/inventory/stock-out.html">
                         <i class="fas fa-arrow-down"></i>
                         Stock In
                     </a>
                 </li>
 
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/stock-out.html">
+                        <i class="fas fa-arrow-up"></i>
+                        Stock Out
+                    </a>
+                </li>
 
                 <li data-module="inventory">
                     <a href="../../pages/inventory/adjustments.html">
@@ -112,7 +118,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                     </a>
                 </li>
 
-               
+                <li data-module="inventory">
+                    <a href="../../pages/inventory/low-stock.html">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        Low Stock Alerts
+                    </a>
+                </li>
 
                 <li class="menu-title" data-module="employees">
                     Employees
@@ -223,7 +234,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search Employees...">
+                <input type="text" id="employee-search" placeholder="Search Employees...">
             </div>
 
             <button class="icon-btn">
@@ -262,7 +273,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 
             <div class="filter-group">
 
-                <select>
+                <select id="department-filter">
                     <option>All Departments</option>
                     <option>Sales</option>
                     <option>IT</option>
@@ -273,7 +284,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                     <option>Procurement</option>
                 </select>
 
-                <select>
+                <select id="status-filter">
                     <option>All Status</option>
                     <option>Active</option>
                     <option>Inactive</option>
@@ -288,7 +299,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                     Export
                 </button>
 
-                <button class="add-btn">
+                <button class="add-btn" id="openAddEmployeeBtn">
                     <i class="fas fa-plus"></i>
                     Add Employee
                 </button>
@@ -317,187 +328,65 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                 </thead>
 
                 <tbody>
-
-                    <tr>
-                        <td>EMP-001</td>
-                        <td>Maria C. Santos</td>
-                        <td>Sales Manager</td>
-                        <td>Sales</td>
-                        <td>Mar 12, 2018</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-002</td>
-                        <td>Roberto P. Cruz</td>
-                        <td>IT Specialist</td>
-                        <td>IT</td>
-                        <td>Jul 5, 2020</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-003</td>
-                        <td>Ana B. Reyes</td>
-                        <td>Accountant</td>
-                        <td>Finance</td>
-                        <td>Jan 18, 2019</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-004</td>
-                        <td>Jose M. Bautista</td>
-                        <td>Warehouse Staff</td>
-                        <td>Warehouse</td>
-                        <td>Sep 3, 2021</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-005</td>
-                        <td>Carmen R. Flores</td>
-                        <td>HR Officer</td>
-                        <td>HR</td>
-                        <td>Feb 22, 2017</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-006</td>
-                        <td>Miguel T. Torres</td>
-                        <td>Sales Rep</td>
-                        <td>Sales</td>
-                        <td>May 14, 2022</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-007</td>
-                        <td>Liza P. Gomez</td>
-                        <td>Finance Analyst</td>
-                        <td>Finance</td>
-                        <td>Nov 8, 2020</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-008</td>
-                        <td>Andres K. Villanueva</td>
-                        <td>Delivery Driver</td>
-                        <td>Logistics</td>
-                        <td>Jun 1, 2023</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status inactive">
-                                INACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-009</td>
-                        <td>Norma S. dela Paz</td>
-                        <td>Receptionist</td>
-                        <td>Admin</td>
-                        <td>Aug 15, 2016</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status inactive">
-                                INACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>EMP-010</td>
-                        <td>Ricardo L. Mendez</td>
-                        <td>Purchasing Officer</td>
-                        <td>Procurement</td>
-                        <td>Apr 20, 2021</td>
-                        <td>
-                            <i class="fas fa-envelope"></i>
-                            <i class="fas fa-phone"></i>
-                        </td>
-                        <td>
-                            <span class="status success">
-                                ACTIVE
-                            </span>
-                        </td>
-                    </tr>
-
+                    <!-- rows injected by employees.js -->
                 </tbody>
 
             </table>
 
         </div>
 
+        <!-- ADD EMPLOYEE MODAL -->
+        <div class="modal" id="employeeModal">
+            <div class="modal-content">
+
+                <h2>Add Employee</h2>
+
+                <div class="item-row">
+                    <input type="text" id="employee-first-name" placeholder="First Name">
+                    <input type="text" id="employee-last-name" placeholder="Last Name">
+                </div>
+
+                <label>Position</label>
+                <input type="text" id="employee-position" placeholder="e.g. Barista, Cashier">
+
+                <label>Salary (₱)</label>
+                <input type="number" id="employee-salary" placeholder="0.00" min="0" step="0.01">
+
+                <label>Hire Date</label>
+                <input type="date" id="employee-hire-date">
+
+                <label>Status</label>
+                <select id="employee-status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+
+                <p style="margin:20px 0 8px;font-size:13px;color:#666;border-top:1px solid #eee;padding-top:16px">
+                    A login account will be created for this employee:
+                </p>
+
+                <label>Username</label>
+                <input type="text" id="employee-username" placeholder="e.g. jdelacruz">
+
+                <label>Email</label>
+                <input type="email" id="employee-email" placeholder="e.g. jdelacruz@brosbrew.com">
+
+                <label>Password</label>
+                <input type="password" id="employee-password" placeholder="Set a login password" autocomplete="new-password" maxlength="16">
+
+                <div class="modal-footer">
+                    <button id="closeEmployeeModalBtn">Cancel</button>
+                    <button id="saveEmployeeBtn">Save Employee</button>
+                </div>
+
+            </div>
+        </div>
+
     </section>
 
 </main>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/employees.js"></script>
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>

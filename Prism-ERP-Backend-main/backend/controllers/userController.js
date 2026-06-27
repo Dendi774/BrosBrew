@@ -32,6 +32,30 @@ export const getUserByEmail = async (req, res) => {
   }
 };
 
+// POST /api/v1/users/login
+// Checks the submitted username/email + password against the users table.
+export const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    const user = await UserModel.getUserByUsernameOrEmail(username.trim());
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    // Never send the password back to the client
+    const { password: _pw, ...safeUser } = user;
+    res.status(200).json(safeUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const createUser = async (req, res) => {
   try {
     const result = await UserModel.createUser(req.body);

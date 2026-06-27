@@ -3,6 +3,7 @@ import * as UserController from '../controllers/userController.js';
 
 const router = Router();
 
+router.post('/login', UserController.login); // must be before /:id
 router.get('/by-email', UserController.getUserByEmail); // must be before /:id
 router.get('/', UserController.getUsers);
 router.get('/:id', UserController.getUser);

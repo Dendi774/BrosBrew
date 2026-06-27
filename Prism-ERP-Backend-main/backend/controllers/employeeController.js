@@ -22,7 +22,7 @@ export const getEmployee = async (req, res) => {
 export const createEmployee = async (req, res) => {
   try {
     const result = await EmployeeModel.createEmployee(req.body);
-    res.status(201).json({ message: 'Employee created', id: result.insertId });
+    res.status(201).json({ message: 'Employee created', id: result.insertId, user_id: result.user_id });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
