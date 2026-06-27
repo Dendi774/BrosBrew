@@ -12,6 +12,7 @@ import receiptRoutes from './routes/receiptRoutes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
 import ingredientsRoutes from './routes/ingredientsRoutes.js';
 import stockInRoutes from './routes/stockInRoutes.js';
+import inventoryAdjustmentRoutes from './routes/inventoryAdjustmentRoutes.js';
 import cors from 'cors';
 
 const app = express();
@@ -37,6 +38,8 @@ app.use('/api/v1/receipts', receiptRoutes);
 app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api/v1/ingredients', ingredientsRoutes);
 app.use('/api/v1/stockIn', stockInRoutes);
+app.use('/api/v1/adjustments', inventoryAdjustmentRoutes);
+
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port http://localhost:${process.env.PORT || 3000}`);

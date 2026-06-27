@@ -7,7 +7,13 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (id) => {
   const [rows] = await pool.query('SELECT * FROM users WHERE user_id = ?', [id]);
-  return rows[0];
+  return rows[0] || null;
+};
+
+// Used to resolve the session email → user_id when recording receipts
+export const getUserByEmail = async (email) => {
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  return rows[0] || null;
 };
 
 export const createUser = async (data) => {

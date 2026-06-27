@@ -1,6 +1,5 @@
 import * as InvoiceModel from '../models/invoiceModel.js';
 
-// GET /api/invoices — list all, or search if a ?search= query param is given
 export const getInvoices = async (req, res) => {
   try {
     const { search } = req.query;
@@ -13,7 +12,15 @@ export const getInvoices = async (req, res) => {
   }
 };
 
-// GET /api/invoices/:invoiceId — get one invoice
+// GET /api/v1/invoices/unpaid — for the receipt modal dropdown
+export const getUnpaidInvoices = async (req, res) => {
+  try {
+    res.json(await InvoiceModel.getUnpaidInvoices());
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getInvoice = async (req, res) => {
   try {
     const invoice = await InvoiceModel.getInvoiceById(req.params.invoiceId);
@@ -24,18 +31,8 @@ export const getInvoice = async (req, res) => {
   }
 };
 
-// POST /api/invoices — create a standalone invoice
-export const createInvoice = async (req, res) => {
-  try {
-    const invoiceId = await InvoiceModel.createInvoice(req.body);
-    const invoice = await InvoiceModel.getInvoiceById(invoiceId);
-    res.status(201).json(invoice);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+// Invoices are system-generated from orders — no manual create endpoint exposed.
 
-// PATCH /api/invoices/:invoiceId — update editable invoice fields
 export const updateInvoice = async (req, res) => {
   try {
     await InvoiceModel.updateInvoice(req.params.invoiceId, req.body);
@@ -45,7 +42,6 @@ export const updateInvoice = async (req, res) => {
   }
 };
 
-// DELETE /api/invoices/:invoiceId — delete an invoice
 export const deleteInvoice = async (req, res) => {
   try {
     await InvoiceModel.deleteInvoice(req.params.invoiceId);

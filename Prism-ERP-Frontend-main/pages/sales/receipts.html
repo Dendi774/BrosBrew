@@ -103,23 +103,9 @@
                 </li>
 
                 <li data-module="inventory">
-                    <a href="../../pages/inventory/stock-out.html">
-                        <i class="fas fa-arrow-up"></i>
-                        Stock Out
-                    </a>
-                </li>
-
-                <li data-module="inventory">
                     <a href="../../pages/inventory/adjustments.html">
                         <i class="fas fa-sliders"></i>
                         Inventory Adjustments
-                    </a>
-                </li>
-
-                <li data-module="inventory">
-                    <a href="../../pages/inventory/low-stock.html">
-                        <i class="fas fa-triangle-exclamation"></i>
-                        Low Stock Alerts
                     </a>
                 </li>
 
@@ -277,11 +263,6 @@
                     Export
                 </button>
 
-                <button class="btn-primary" id="new-receipt-btn">
-                    <i class="fas fa-plus"></i>
-                    New Receipt
-                </button>
-
             </div>
 
         </div>
@@ -312,55 +293,6 @@
             </table>
 
         </div>
-
-        <div class="modal" id="receiptModal">
-
-                <div class="modal-content">
-
-                    <h2>Create Receipt</h2>
-
-                    <h3>Products</h3>
-
-                    <div id="itemsContainer">
-
-                        <div class="item-row">
-
-                            <input 
-                            type="text"
-                            placeholder="invoice reference" id="invoice-id">
-
-
-                            <input
-                            type="text"
-                            placeholder="Method" id="method">
-
-                            <input
-                            type="number"
-                            placeholder="Amount"
-                            min="0"
-                            id="amount">
-
-                            <input
-                            type="text"
-                            placeholder="processed by" id="processed-by">
-
-                        </div>
-
-                    </div>
-
-
-                    <button id="addReceiptBtn">
-                        Add Receipt
-                    </button>
-
-                    <button id="closeModalBtn">
-                        Cancel
-                    </button>
-
-
-                </div>
-
-            </div>
 
     </section>
 

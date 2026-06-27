@@ -1,16 +1,13 @@
 import * as SalesOrderModel from '../models/salesOrderModel.js';
 
-// GET /api/sales-orders — list all orders
 export const getOrders = async (req, res) => {
   try {
-    const orders = await SalesOrderModel.getAllOrders();
-    res.json(orders);
+    res.json(await SalesOrderModel.getAllOrders());
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// GET /api/sales-orders/:id — get one order with full detail (items + invoice)
 export const getOrder = async (req, res) => {
   try {
     const order = await SalesOrderModel.getOrderById(req.params.id);
@@ -21,30 +18,38 @@ export const getOrder = async (req, res) => {
   }
 };
 
-// POST /api/sales-orders — create a new order (and its invoice/items)
 export const createOrder = async (req, res) => {
   try {
-    const orderId = await SalesOrderModel.createOrder(req.body);
-    // Fetch the full order back so the response can be used directly as a receipt
+    const orderId  = await SalesOrderModel.createOrder(req.body);
     const fullOrder = await SalesOrderModel.getOrderById(orderId);
     res.status(201).json(fullOrder);
   } catch (error) {
-    // 400, since failures here are almost always bad input (stock, missing fields, etc.)
     res.status(400).json({ message: error.message });
   }
 };
 
-// PATCH /api/sales-orders/:id/status — update an order's status only
+// PATCH /api/v1/orders/:id/status  — generic status change (used internally + for Cancelled)
 export const updateOrderStatus = async (req, res) => {
   try {
-    await SalesOrderModel.updateOrderStatus(req.params.id, req.body.status);
-    res.json({ message: 'Order status updated' });
+    const result = await SalesOrderModel.updateOrderStatus(req.params.id, req.body.status);
+    res.json({ message: 'Order status updated', ...result });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const code = error.message.includes('Cannot move') ? 400 : 500;
+    res.status(code).json({ message: error.message });
   }
 };
 
-// DELETE /api/sales-orders/:id — remove an order
+// PATCH /api/v1/orders/:id/complete  — barista marks a Preparing order as done
+export const completeOrder = async (req, res) => {
+  try {
+    const result = await SalesOrderModel.completeOrder(req.params.id);
+    res.json({ message: 'Order marked as Completed', ...result });
+  } catch (error) {
+    const code = error.message.includes('Cannot move') || error.message.includes('not found') ? 400 : 500;
+    res.status(code).json({ message: error.message });
+  }
+};
+
 export const deleteOrder = async (req, res) => {
   try {
     await SalesOrderModel.deleteOrder(req.params.id);

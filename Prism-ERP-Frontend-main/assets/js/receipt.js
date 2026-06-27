@@ -1,122 +1,110 @@
-const API_URL = "http://localhost:5500/api/v1/receipts"; // API endpoint for receipts
-const newReceiptBtn = document.getElementById("new-receipt-btn"); // Button to create a new receipt
-const modal = document.getElementById("receiptModal");
-const addReceiptBtn = document.getElementById("addReceiptBtn");
-const closeModalBtn = document.getElementById("closeModalBtn");
+// Receipts page is VIEW-ONLY. Receipts are created from the Invoices page
+// ("Record Payment"), which calls POST /api/v1/receipts itself — this page
+// only lists/searches the receipts that already exist and lets you print one.
 
-// Event listener to close the modal when the close button is clicked
-closeModalBtn.addEventListener("click", () => {
-    modal.classList.remove("show"); // Hide the modal
-});
+const API_URL = 'http://localhost:5500/api/v1/receipts';
 
-newReceiptBtn.addEventListener("click", () => {
-    modal.classList.add("show"); // Show the modal for creating a new receipt
-});
+const fmt = (n) =>
+  '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-addReceiptBtn.addEventListener("click", async () => {
-    await addReceipt(); // Call the function to add a new receipt
-});
-
-// loads the receipts data when the page is loaded
+// ── Load receipts table ───────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-    await loadReceipts();
+  await loadReceipts();
+
+  document.querySelector('.invoice-search')?.addEventListener('input', (e) => {
+    const term = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('.table-card tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
 });
 
+// Cache of the currently loaded receipts, so printReceipt() can look one up
+// by receipt_number without firing another API call.
+let _receiptsCache = [];
 
-// function for loading receipts data from the API
 async function loadReceipts() {
-    const response = await fetch(API_URL);
-    const receipts = await response.json();
-    
-    console.log(receipts); // Log the receipts data to the console for debugging
+  const tbody = document.querySelector('.table-card tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">Loading…</td></tr>';
+  try {
+    const res      = await fetch(API_URL);
+    const receipts = await res.json();
+    _receiptsCache = receipts;
 
-    const tableBody = document.querySelector(".table-card tbody");
-    tableBody.innerHTML = "";
-
-    Array.from(receipts).forEach(async (receipt) => {
-        const processedBy = await getUserById(receipt.processed_by); // Get the username of the user who processed the receipt
-        tableBody.innerHTML += `
-            <tr>
-                <td>${receipt.receipt_number}</td>
-                <td>${formatDate(receipt.receipt_date)}</td>
-                <td>${receipt.invoice_id}</td>
-                <td>${receipt.method}</td>
-                <td>₱${receipt.amount.toLocaleString()}</td>
-                <td>${processedBy}</td>
-                <td>
-                    <i class="fas fa-eye action-icon" onclick="viewReceipt('${receipt.receipt_number}')"></i>
-                    <i class="fas fa-print action-icon" onclick="printReceipt('${receipt.receipt_number}')"></i>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-
-// function for printing a receipt and viewing the receipt details
-function viewReceipt(receiptNumber) {
-    // Implement the logic to view the receipt details
-    console.log(`Viewing receipt: ${receiptNumber}`);
-}
-
-
-// function for adding a new receipt from the API
-async function addReceipt() {
-    const receiptDetails = {
-        invoice_id: document.getElementById("invoice-id").value,
-        method: document.getElementById("method").value,
-        amount: parseFloat(document.getElementById("amount").value),
-        processed_by: await getUserId(document.getElementById("processed-by").value)
+    if (!receipts.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No receipts yet</td></tr>';
+      return;
     }
 
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(receiptDetails)
-    });
-
-    const result = await response.json();
-
-    console.log(result); // Log the result of adding the receipt for debugging
-    await loadReceipts(); // Reload the receipts data to reflect the new addition
-    modal.style.display = "none"; // Hide the modal after adding the receipt
+    tbody.innerHTML = receipts.map(r => `
+      <tr>
+        <td>${r.receipt_number}</td>
+        <td>${formatDate(r.receipt_date)}</td>
+        <td>${r.invoice_id}</td>
+        <td>${r.method}</td>
+        <td>${fmt(r.amount)}</td>
+        <td>${r.processed_by_name || '—'}</td>
+        <td>
+          <button class="icon-btn" title="Print" onclick="printReceipt('${r.receipt_number}')">
+            <i class="fas fa-print"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#e74c3c">Error: ${err.message}</td></tr>`;
+  }
 }
 
+// Opens a small printable slip for the given receipt in a new window.
+window.printReceipt = (receiptNumber) => {
+  const r = _receiptsCache.find(x => x.receipt_number === receiptNumber);
+  if (!r) { alert('Receipt not found.'); return; }
 
-// function for searching receipts from the API
-async function seachReceipts() {
-    
-}
+  const win = window.open('', '_blank', 'width=380,height=600');
+  win.document.write(`
+    <html>
+      <head>
+        <title>${r.receipt_number}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #222; }
+          h2 { margin: 0 0 4px; }
+          .muted { color: #777; font-size: 12px; margin: 0 0 16px; }
+          table { width: 100%; border-collapse: collapse; font-size: 14px; }
+          td { padding: 6px 0; }
+          td:first-child { color: #777; }
+          td:last-child { text-align: right; font-weight: 600; }
+          hr { border: none; border-top: 1px dashed #ccc; margin: 16px 0; }
+          .total { font-size: 18px; }
+        </style>
+      </head>
+      <body>
+        <h2>BrosBrew Café</h2>
+        <p class="muted">Official Receipt</p>
+        <hr>
+        <table>
+          <tr><td>Receipt #</td><td>${r.receipt_number}</td></tr>
+          <tr><td>Date</td><td>${formatDate(r.receipt_date)}</td></tr>
+          <tr><td>Invoice Ref</td><td>${r.invoice_id}</td></tr>
+          <tr><td>Method</td><td>${r.method}</td></tr>
+          <tr><td>Processed By</td><td>${r.processed_by_name || '—'}</td></tr>
+        </table>
+        <hr>
+        <table>
+          <tr class="total"><td>Amount Paid</td><td>${fmt(r.amount)}</td></tr>
+        </table>
+        <hr>
+        <p class="muted" style="text-align:center">Thank you for your purchase!</p>
+      </body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+};
 
-
-// helper function to format date
-function formatDate(dateString) {
-
-    const formattedDate = new Date(dateString).toLocaleDateString(
-        "en-US",
-        {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        }
-    );
-
-    return formattedDate;
-}
-
-async function getUserId(username) {
-    const response = await fetch(`http://localhost:5500/api/v1/users`);
-    const users = await response.json();
-    const user = users.find(u => u.username === username);
-    console.log(user);
-    return user ? user.user_id : null;
-}
-
-// function to get the specific user the receipt was processed by
-async function getUserById(userId) {
-    const response = await fetch(`http://localhost:5500/api/v1/users/${userId}`);
-    const user = await response.json();
-    return user.username; // Assuming the API returns a user object with a username property
+function formatDate(ds) {
+  return new Date(ds).toLocaleDateString('en-PH', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 }

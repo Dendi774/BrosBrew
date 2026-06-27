@@ -2,8 +2,7 @@ import * as UserModel from '../models/userModel.js';
 
 export const getUsers = async (req, res) => {
   try {
-    const data = await UserModel.getAllUsers();
-    res.status(200).json(data);
+    res.status(200).json(await UserModel.getAllUsers());
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -12,6 +11,20 @@ export const getUsers = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const data = await UserModel.getUserById(req.params.id);
+    if (!data) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /api/v1/users/by-email?email=manager@brosbrew.com
+// Used by the frontend to resolve the logged-in session email → user_id
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: 'email query param is required' });
+    const data = await UserModel.getUserByEmail(email);
     if (!data) return res.status(404).json({ message: 'User not found' });
     res.status(200).json(data);
   } catch (err) {

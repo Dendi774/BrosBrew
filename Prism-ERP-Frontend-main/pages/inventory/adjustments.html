@@ -18,8 +18,6 @@
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body>
@@ -98,18 +96,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                 </li>
 
                 <li data-module="inventory">
-                    <a href="../../pages/inventory/stock-out.html">
+                    <a href="../../pages/inventory/stock-in.html">
                         <i class="fas fa-arrow-down"></i>
                         Stock In
                     </a>
                 </li>
 
-                <li data-module="inventory">
-                    <a href="../../pages/inventory/stock-out.html">
-                        <i class="fas fa-arrow-up"></i>
-                        Stock Out
-                    </a>
-                </li>
+                
 
                 <li class="active" data-module="inventory">
                     <a href="../../pages/inventory/adjustments.html">
@@ -118,12 +111,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                     </a>
                 </li>
 
-                <li data-module="inventory">
-                    <a href="../../pages/inventory/low-stock.html">
-                        <i class="fas fa-triangle-exclamation"></i>
-                        Low Stock Alerts
-                    </a>
-                </li>
+                
 
                 <li class="menu-title" data-module="employees">
                     Employees
@@ -275,7 +263,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                 <!-- Optional filters -->
             </div>
 
-            <button class="add-btn">
+            <button class="add-btn" id="newAdjustmentBtn">
                 <i class="fas fa-plus"></i>
                 New Adjustment
             </button>
@@ -293,69 +281,51 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
                     <tr>
                         <th>Adj #</th>
                         <th>Date</th>
-                        <th>SKU</th>
-                        <th>Product</th>
+                        <th>Ingredient</th>
                         <th>Type</th>
                         <th>Qty Change</th>
                         <th>Reason</th>
-                        <th>By</th>
+                        <th>Source</th>
                         <th>Status</th>
                     </tr>
                 </thead>
 
                 <tbody>
-
-                    <tr>
-                        <td>IA-2406-0011</td>
-                        <td>Jun 12, 2026</td>
-                        <td>SKU-0995</td>
-                        <td>Correction Fluid 20ml</td>
-                        <td>Decrease</td>
-                        <td style="color:#ef4444;font-weight:600;">-6</td>
-                        <td>Damaged / Expiry</td>
-                        <td>Jose Bautista</td>
-                        <td>
-                            <span class="status success">
-                                APPROVED
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>IA-2406-0010</td>
-                        <td>Jun 11, 2026</td>
-                        <td>SKU-6601</td>
-                        <td>Keyboard Mechanical</td>
-                        <td>Decrease</td>
-                        <td style="color:#ef4444;font-weight:600;">-2</td>
-                        <td>Lost / Missing</td>
-                        <td>Carmen Flores</td>
-                        <td>
-                            <span class="status success">
-                                APPROVED
-                            </span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>IA-2406-0009</td>
-                        <td>Jun 10, 2026</td>
-                        <td>SKU-4410</td>
-                        <td>Coffee 3-in-1 Box</td>
-                        <td>Increase</td>
-                        <td style="color:#22c55e;font-weight:600;">+10</td>
-                        <td>Count discrepancy</td>
-                        <td>Maria Santos</td>
-                        <td>
-                            <span class="status warning">
-                                PENDING
-                            </span>
-                        </td>
-                    </tr>
-
+                    <!-- Adjustment rows are populated dynamically by inventoryAdjustments.js -->
                 </tbody>
 
             </table>
+
+        </div>
+
+        <!-- NEW ADJUSTMENT MODAL -->
+        <div class="modal" id="adjustmentModal">
+
+            <div class="modal-content">
+
+                <h2>New Inventory Adjustment</h2>
+
+                <label>Ingredient</label>
+                <select id="adjIngredientSelect">
+                    <option value="">Select Ingredient</option>
+                </select>
+
+                <label>Type</label>
+                <select id="adjType">
+                    <option value="Decrease">Decrease (waste, damage, loss)</option>
+                    <option value="Increase">Increase (count correction)</option>
+                </select>
+
+                <label>Quantity</label>
+                <input id="adjQuantity" type="number" min="0" step="any" placeholder="0">
+
+                <label>Reason</label>
+                <input id="adjReason" type="text" placeholder="e.g. Spilled / Expired / Stock count correction">
+
+                <button id="saveAdjustmentBtn" type="button">Save Adjustment</button>
+                <button id="closeAdjustmentModalBtn" type="button">Cancel</button>
+
+            </div>
 
         </div>
 
@@ -363,34 +333,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 
 </main>
 
-
-<script>
-
-const ctx = document.getElementById('stockChart');
-
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: [
-            'SKU-1042',
-            'SKU-0881',
-            'SKU-2201',
-            'SKU-1567',
-            'SKU-3301'
-        ],
-        datasets: [{
-            label: 'Available Stock',
-            data: [9,8,2,16,53]
-        }]
-    },
-    options: {
-        responsive:true,
-        maintainAspectRatio:false
-    }
-});
-
-</script>
 <script src="../../assets/js/dashboard.js"></script>
+<script src="../../assets/js/inventoryAdjustments.js"></script>
+
 
     <!-- Apply role-based sidebar restrictions now that the DOM exists -->
     <script>

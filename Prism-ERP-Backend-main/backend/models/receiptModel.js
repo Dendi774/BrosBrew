@@ -1,30 +1,56 @@
 import pool from '../database/db.js';
 import * as SalesOrderModel from './salesOrderModel.js';
 
-// Generates a short, unique-ish receipt number
-const generateReceiptNumber = () => {
-  const timestamp = Date.now().toString().slice(-8);
-  return `OR-${timestamp}`;
-};
+const generateReceiptNumber = () => `OR-${Date.now().toString().slice(-8)}`;
 
-// List all receipts
+// ── READ ───────────────────────────────────────────────────────────────────────
+
 export const getAllReceipts = async () => {
   const [rows] = await pool.query(
-    'SELECT * FROM receipts ORDER BY receipt_date DESC'
+    `SELECT r.*, u.username AS processed_by_name
+     FROM receipts r
+     LEFT JOIN users u ON r.processed_by = u.user_id
+     ORDER BY r.receipt_date DESC`
   );
   return rows;
 };
 
-// Get one receipt by ID
+export const getReceiptById = async (id) => {
+  const [rows] = await pool.query(
+    `SELECT r.*, u.username AS processed_by_name
+     FROM receipts r
+     LEFT JOIN users u ON r.processed_by = u.user_id
+     WHERE r.receipt_id = ?`,
+    [id]
+  );
+  return rows[0] || null;
+};
+
+// ── CREATE ─────────────────────────────────────────────────────────────────────
+//
+// Flow:
+//   1. Lock the invoice row
+//   2. Reject if the linked order has been Cancelled
+//   3. Validate amount won't exceed the outstanding balance
+//   4. Insert receipt, update invoice paid/status
+//   5. If invoice is now fully Paid AND the linked order is still Pending
+//      → move order to Preparing (triggers ingredient deduction)
+//
+// NOTE: A Cancelled order can no longer receive payments. Once an order is
+// cancelled there is nothing left to settle, so the invoice is effectively
+// closed — trying to record a receipt against it is rejected outright.
+
 export const createReceipt = async (data) => {
   const { invoice_id, amount, method, processed_by } = data;
 
   if (!invoice_id || !amount || !method) {
     throw new Error('invoice_id, amount, and method are required');
   }
+  if (Number(amount) <= 0) {
+    throw new Error('Payment amount must be greater than zero');
+  }
 
   const connection = await pool.getConnection();
-
   try {
     await connection.beginTransaction();
 
@@ -32,26 +58,40 @@ export const createReceipt = async (data) => {
       'SELECT * FROM invoices WHERE invoice_id = ? FOR UPDATE',
       [invoice_id]
     );
-    if (invoiceRows.length === 0) {
-      throw new Error('Invoice not found');
-    }
+    if (invoiceRows.length === 0) throw new Error('Invoice not found');
     const invoice = invoiceRows[0];
 
-    const newPaid = Number(invoice.paid) + Number(amount);
-    if (newPaid > Number(invoice.amount)) {
-      throw new Error('Payment exceeds remaining invoice balance');
+    if (invoice.status === 'Paid') {
+      throw new Error('This invoice is already fully paid');
     }
 
-    let newStatus = 'Partial';
-    if (newPaid >= Number(invoice.amount)) newStatus = 'Paid';
-    else if (newPaid === 0) newStatus = 'Unpaid';
+    const [orderRowsCheck] = await connection.query(
+      'SELECT status FROM sales_orders WHERE invoice_id = ? FOR UPDATE',
+      [invoice_id]
+    );
+    if (orderRowsCheck.length > 0 && orderRowsCheck[0].status === 'Cancelled') {
+      throw new Error('Cannot record a payment for a cancelled order');
+    }
+
+    const balance = Number(invoice.amount) - Number(invoice.paid);
+    const payment = Number(amount);
+    if (payment > balance + 0.001) {
+      throw new Error(
+        `Payment of ₱${payment.toFixed(2)} exceeds remaining balance of ₱${balance.toFixed(2)}`
+      );
+    }
+
+    const newPaid   = Number(invoice.paid) + payment;
+    const newStatus = newPaid >= Number(invoice.amount) ? 'Paid'
+                    : newPaid === 0                     ? 'Unpaid'
+                    :                                     'Partial';
 
     const receiptNumber = generateReceiptNumber();
 
     await connection.query(
       `INSERT INTO receipts (receipt_number, invoice_id, amount, method, processed_by)
        VALUES (?, ?, ?, ?, ?)`,
-      [receiptNumber, invoice_id, amount, method, processed_by || null]
+      [receiptNumber, invoice_id, payment, method, processed_by || null]
     );
 
     await connection.query(
@@ -59,22 +99,17 @@ export const createReceipt = async (data) => {
       [newPaid, newStatus, invoice_id]
     );
 
-    // If this payment just fully settled the invoice, move the linked
-    // order from 'Pending' into 'Preparing' — but only if it's still
-    // 'Pending'. If it's already Preparing/Completed/Cancelled, leave it
-    // alone (e.g. don't un-cancel a cancelled order just because a late
-    // payment came in).
+    // Only auto-advance to Preparing when the order is still Pending.
+    // (Cancelled orders are already rejected above, so we only ever see
+    // Pending/Approved/Preparing/Completed orders reach this point.)
     if (newStatus === 'Paid') {
-    // Look up the order linked to this invoice, then route the status
-    // change through updateOrderStatus so inventory deduction happens too
-    const [orderRows] = await connection.query(
+      const [orderRows] = await connection.query(
         'SELECT order_id, status FROM sales_orders WHERE invoice_id = ?',
         [invoice_id]
-    );
-
-    if (orderRows.length > 0 && orderRows[0].status === 'Pending') {
+      );
+      if (orderRows.length > 0 && orderRows[0].status === 'Pending') {
         await SalesOrderModel.updateOrderStatus(orderRows[0].order_id, 'Preparing', connection);
-    }
+      }
     }
 
     await connection.commit();
